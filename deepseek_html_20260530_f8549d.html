@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Classificação de Risco · Mobile Triage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #eef2f9;
+            font-family: 'Inter', sans-serif;
+            padding: 16px 12px 32px 12px;
+            min-height: 100vh;
+        }
+
+        /* container mobile-first */
+        .mobile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* cards */
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
+            padding: 20px 18px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FBFE 100%);
+            border-radius: 32px;
+            padding: 20px 18px;
+            text-align: center;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            background: linear-gradient(125deg, #1B3B4F, #2C6E8F);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .sub {
+            color: #5b7a95;
+            font-size: 0.75rem;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* tabs estilo mobile */
+        .tabs-mobile {
+            display: flex;
+            gap: 12px;
+            background: #f1f4f9;
+            padding: 5px;
+            border-radius: 48px;
+            margin-bottom: 6px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 8px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #4f6f8a;
+        }
+        .tab-btn i { font-size: 1.1rem; }
+        .tab-btn.active {
+            background: white;
+            color: #1f5e7e;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+
+        /* resultado principal (destaque) */
+        .result-card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 20px 18px;
+            text-align: center;
+            transition: all 0.2s;
+            border-left: 8px solid #cbd5e1;
+            box-shadow: 0 12px 22px -10px rgba(0, 0, 0, 0.1);
+        }
+        .color-badge {
+            display: inline-flex;
+            width: 70px;
+            height: 70px;
+            border-radius: 70px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+        .risk-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            margin: 10px 0 6px;
+        }
+        .risk-time {
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #f0f4fa;
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            margin-top: 6px;
+        }
+        .risk-message {
+            font-size: 0.85rem;
+            color: #2c4c6c;
+            margin-top: 14px;
+            background: #F0F6FE;
+            padding: 12px;
+            border-radius: 24px;
+        }
+
+        /* select */
+        .select-wrapper {
+            margin: 8px 0 4px;
+        }
+        select {
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 34px;
+            border: 1.5px solid #e2edf2;
+            background: white;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0f2c3b;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%233a6b8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            cursor: pointer;
+        }
+
+        /* checklist */
+        .checklist-title {
+            font-weight: 600;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            color: #1f4a62;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .criteria-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        .risk-item {
+            background: #ffffff;
+            border: 1px solid #eef2f8;
+            border-radius: 24px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: 0.1s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .risk-item:active {
+            background: #f9fcff;
+            transform: scale(0.99);
+        }
+        .risk-item input {
+            width: 24px;
+            height: 24px;
+            accent-color: #2c7da0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .risk-item label {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #1a2f3f;
+            line-height: 1.35;
+            flex: 1;
+            cursor: pointer;
+        }
+        .risk-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 50px;
+            background: #f0f4fa;
+            white-space: nowrap;
+        }
+
+        .btn-clear {
+            background: #f0f4f9;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 44px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2c5a74;
+        }
+        .btn-clear:active {
+            background: #e2eaf2;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6c8dab;
+            margin-top: 12px;
+            padding: 8px;
+        }
+
+        /* scroll suave */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2edf2;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b9cfdf;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="mobile-container">
+    <!-- cabeçalho -->
+    <div class="header-card">
+        <h1><i class="fas fa-stethoscope"></i> Triagem · Risco</h1>
+        <div class="sub">Protocolo Manchester · Aparecida de Goiânia 2025</div>
+    </div>
+
+    <!-- abas adulto/pediátrico -->
+    <div class="tabs-mobile">
+        <button class="tab-btn active" id="tabAdulto"><i class="fas fa-user"></i> Adulto</button>
+        <button class="tab-btn" id="tabPediatrico"><i class="fas fa-child"></i> Pediátrico</button>
+    </div>
+
+    <!-- resultado dinâmico (destaque) -->
+    <div class="result-card" id="resultCard">
+        <div class="color-badge" id="resultColorBadge" style="background: #cddfe7;"></div>
+        <div class="risk-title" id="resultTitle">Aguardando</div>
+        <div class="risk-time" id="resultTime">⏱️ Selecione uma queixa</div>
+        <div class="risk-message" id="resultMessage">Marque os sintomas ou discriminadores — o sistema calcula a prioridade mais alta (Vermelho > Laranja > Amarelo > Verde > Azul).</div>
+    </div>
+
+    <!-- queixa principal + checklist -->
+    <div class="card">
+        <div class="select-wrapper">
+            <select id="queixaSelect"></select>
+        </div>
+        <div class="checklist-title"><i class="fas fa-clipboard-list"></i> Critérios de risco</div>
+        <div id="checklistContainer" class="criteria-list">
+            <div style="text-align:center; padding: 24px; color:#6a8eaa;">Selecione uma queixa principal</div>
+        </div>
+        <button class="btn-clear" id="clearChecksBtn"><i class="fas fa-eraser"></i> Limpar todos os sintomas</button>
+    </div>
+    <footer>
+        <i class="fas fa-notes-medical"></i> Baseado no Protocolo Municipal · Acolhimento e Classificação de Risco
+    </footer>
+</div>
+
+<script>
+    // ---------- CORES E PRIORIDADES ----------
+    const COR_PRIORITY = { "Vermelho": 4, "Laranja": 3, "Amarelo": 2, "Verde": 1, "Azul": 0 };
+    const COR_LABELS = { "Vermelho": "EMERGÊNCIA", "Laranja": "MUITO URGENTE", "Amarelo": "URGENTE", "Verde": "POUCO URGENTE", "Azul": "NÃO URGENTE" };
+    const COR_TIMES = { "Vermelho": "Atendimento imediato (0 min)", "Laranja": "Atendimento até 10 min", "Amarelo": "Atendimento até 60 min", "Verde": "Atendimento até 120 min", "Azul": "Atendimento até 240 min" };
+    const COR_COLORS = { "Vermelho": "#c4284c", "Laranja": "#e68a2e", "Amarelo": "#eab308", "Verde": "#1f9a8e", "Azul": "#3b82f6" };
+
+    // ======================= ADULTO (conforme PDF) =======================
+    const adultoQueixas = [
+        { id: "9.1", title: "Alterações cutâneas", criteria: [
+            { label: "Sinais de choque (hipotensão/bradicardia, perfusão comprometida, alteração consciência)", color: "Vermelho" },
+            { label: "Edema de face / angioedema / perfusão TEC>2s / dor intensa (7-10) / mordedura grave / toxemia", color: "Laranja" },
+            { label: "Dor moderada (4-6) / ferida corto-contusa / violência / maus-tratos", color: "Amarelo" },
+            { label: "Mordedura leve / dor leve (1-3) / abscesso / placa eritematosa", color: "Verde" },
+            { label: "Quadro crônico / úlcera crônica / dor leve >7 dias", color: "Azul" }
+        ] },
+        { id: "9.2", title: "Alterações de comportamento", criteria: [
+            { label: "Sinais de choque (instabilidade hemodinâmica)", color: "Vermelho" },
+            { label: "Overdose / envenenamento / agitação extrema / alucinações / déficit neurológico agudo", color: "Laranja" },
+            { label: "Vômito persistente / alto risco auto/heteroagressão / desorientação / potencial suicida", color: "Amarelo" },
+            { label: "Vômitos esparsos / pensamentos suicidas / história psiquiátrica", color: "Verde" },
+            { label: "Sintomas ansiosos ou depressivos >7 dias", color: "Azul" }
+        ] },
+        { id: "9.3", title: "Alterações odontológicas", criteria: [
+            { label: "Septicemia / obstrução VA / choque anafilático / sangramento intenso incontrolável", color: "Vermelho" },
+            { label: "Dor intensa (7-10) / sangramento médio / trismo / avulsão aguda <2h", color: "Laranja" },
+            { label: "Dor moderada / sangramento controlável / edema facial / abscessos", color: "Amarelo" },
+            { label: "Dor leve <7d / sangramento pequeno / febrícula", color: "Verde" },
+            { label: "Dor leve >7d", color: "Azul" }
+        ] },
+        { id: "9.4", title: "Alterações otorrinolaringológicas", criteria: [
+            { label: "Obstrução VA / Glasgow<8 / sangramento intenso", color: "Vermelho" },
+            { label: "Sinais de sepse / Glasgow 9-12 / sangramento médio", color: "Laranja" },
+            { label: "Trauma / Glasgow 12-14 / corpo estranho via aérea superior", color: "Amarelo" },
+            { label: "Dor / calor / rubor / vertigem / edema face / odinofagia leve", color: "Verde" },
+            { label: "Dor >7 dias", color: "Azul" }
+        ] },
+        { id: "9.5", title: "Alterações vasculares", criteria: [
+            { label: "Obstrução VA / choque / cianose central / ferimento arma tórax/abdome", color: "Vermelho" },
+            { label: "Dor intensa (7-10) / grave mecanismo trauma", color: "Laranja" },
+            { label: "Dor moderada (4-6) / cianose membros inferiores", color: "Amarelo" },
+            { label: "Dor leve / edema articular sem flogose / evento <7d", color: "Verde" },
+            { label: "Dor crônica / úlcera crônica", color: "Azul" }
+        ] },
+        { id: "9.6", title: "Convulsão", criteria: [
+            { label: "Convulsão ativa / comprometimento VA", color: "Vermelho" },
+            { label: "Alteração consciência / overdose / respiração inadequada / déficit focal / crise reentrante / hipoglicemia <70", color: "Laranja" },
+            { label: "Crise <12h e alerta / TCE recente", color: "Amarelo" },
+            { label: "Cefaleia com história convulsão <7d / crise <7 dias", color: "Verde" },
+            { label: "Crise isolada >7d sem outros sintomas", color: "Azul" }
+        ] },
+        { id: "9.7", title: "Dengue", criteria: [
+            { label: "Choque / sangramento ativo não controlável / hipotensão severa / cianose", color: "Vermelho" },
+            { label: "Hipotensão PAS≥20 redução / bradicardia<60 / pressão convergente / plaquetas <50k", color: "Laranja" },
+            { label: "Dor abdominal intensa contínua / vômitos persistentes / acúmulo líquidos / sangramento mucosa / letargia", color: "Amarelo" },
+            { label: "Dengue sem sinais de alarme com comorbidades / gestante / idoso", color: "Verde" },
+            { label: "Dengue sem sinais de alarme e sem comorbidades", color: "Azul" }
+        ] },
+        { id: "9.8", title: "Desmaio, vertigem", criteria: [
+            { label: "Glasgow<8 / obstrução VA / convulsão / choque", color: "Vermelho" },
+            { label: "Dor torácica / dispneia aguda / déficit neurológico / pulso filiforme / hipoglicemia", color: "Laranja" },
+            { label: "TCE recente / história inconsciência <12h / primeira crise / dor moderada", color: "Amarelo" },
+            { label: "Dor leve / vômitos esparsos / início <6h", color: "Verde" },
+            { label: "Vertigem >7 dias", color: "Azul" }
+        ] },
+        { id: "9.9", title: "Diarreia e vômitos", criteria: [
+            { label: "Sinais de choque", color: "Vermelho" },
+            { label: "Dor intensa / sangue no vômito ou fezes / respiração inadequada", color: "Laranja" },
+            { label: "Fezes pretas / hematêmese aguda / desidratação moderada", color: "Amarelo" },
+            { label: "Dor leve / vômitos esparsos / início <6h / febril", color: "Verde" },
+            { label: "Reavaliação sem queixas / evento >7d", color: "Azul" }
+        ] },
+        { id: "9.10", title: "Dor abdominal", criteria: [
+            { label: "Obstrução VA / choque", color: "Vermelho" },
+            { label: "Hematêmese / sangue vivo nas fezes / dor intensa / respiração inadequada", color: "Laranja" },
+            { label: "Fezes pretas / dor moderada / vômitos persistentes", color: "Amarelo" },
+            { label: "Dor leve / vômitos / evento <7d", color: "Verde" },
+            { label: "Dor >7 dias", color: "Azul" }
+        ] },
+        { id: "9.11", title: "Dor cervical", criteria: [
+            { label: "Obstrução VA / choque", color: "Vermelho" },
+            { label: "Dor intensa (7-10)", color: "Laranja" },
+            { label: "Déficit neurológico novo / dor moderada / trauma direto", color: "Amarelo" },
+            { label: "Dor leve / início <7d", color: "Verde" },
+            { label: "Dor >7d", color: "Azul" }
+        ] },
+        { id: "9.12", title: "Dor de cabeça", criteria: [
+            { label: "Convulsão ativa / choque", color: "Vermelho" },
+            { label: "Dor intensa / estado mental alterado / déficit focal agudo / perda visão", color: "Laranja" },
+            { label: "História inconsciência / dor moderada", color: "Amarelo" },
+            { label: "Evento <7d / dor leve", color: "Verde" },
+            { label: "Dor >7d", color: "Azul" }
+        ] },
+        { id: "9.13", title: "Dor de garganta", criteria: [
+            { label: "Obstrução VA", color: "Vermelho" },
+            { label: "Dor intensa (7-10)", color: "Laranja" },
+            { label: "Dor moderada / febre", color: "Amarelo" },
+            { label: "Disfagia / tosse / dor leve / evento <7d", color: "Verde" },
+            { label: "Dor >7d", color: "Azul" }
+        ] },
+        { id: "9.14", title: "Dor na coluna", criteria: [
+            { label: "Obstrução VA / choque / ferimento por projétil", color: "Vermelho" },
+            { label: "Dor intensa / grave mecanismo trauma", color: "Laranja" },
+            { label: "Dor moderada / dificuldade andar / limitação movimento", color: "Amarelo" },
+            { label: "Dor leve / evento <7d", color: "Verde" },
+            { label: "Dor crônica", color: "Azul" }
+        ] },
+        { id: "9.15", title: "Dor torácica", criteria: [
+            { label: "IAM suspeito (dor opressiva, sudorese, dispneia) / instabilidade", color: "Vermelho" },
+            { label: "Dor atípica com fatores de risco elevados", color: "Laranja" },
+            { label: "Dor pleurítica estável", color: "Amarelo" },
+            { label: "Dor musculoesquelética", color: "Verde" },
+            { label: "Dor crônica >7d", color: "Azul" }
+        ] },
+        { id: "9.16", title: "Intoxicações exógenas", criteria: [
+            { label: "Obstrução VA / convulsão / choque", color: "Vermelho" },
+            { label: "Edema facial/língua / dor intensa / SpO2<92% / alteração consciência / lesão ocular química", color: "Laranja" },
+            { label: "Erupções disseminadas / crise pós-intoxicação / dor moderada", color: "Amarelo" },
+            { label: "Dor leve recente / evento recente / alterações dérmicas locais", color: "Verde" },
+            { label: "Evento >7d", color: "Azul" }
+        ] },
+        { id: "9.17", title: "Mal-estar geral", criteria: [
+            { label: "Obstrução VA / choque / convulsão", color: "Vermelho" },
+            { label: "Alteração consciência / déficit neurológico / hipoglicemia", color: "Laranja" },
+            { label: "Hemoptise / vesículas disseminadas / dor moderada / febre", color: "Amarelo" },
+            { label: "Dor leve / febril / imunossupressão / púrpura", color: "Verde" },
+            { label: "Dor >7d", color: "Azul" }
+        ] },
+        { id: "9.18", title: "Mordeduras / picadas", criteria: [
+            { label: "Anafilaxia / obstrução VA / choque", color: "Vermelho" },
+            { label: "Edema facial / língua / hemorragia / dor intensa / ferimento cabeça/mãos", color: "Laranja" },
+            { label: "Erupção >10% SC / dor moderada / coceira intensa", color: "Amarelo" },
+            { label: "Infecção local / dor leve / evento recente", color: "Verde" },
+            { label: "Evento >7d", color: "Azul" }
+        ] },
+        { id: "9.19", title: "Politraumas", criteria: [
+            { label: "Trauma grave instável / choque", color: "Vermelho" },
+            { label: "Trauma múltiplos segmentos fratura exposta", color: "Laranja" },
+            { label: "Trauma fechado estável", color: "Amarelo" },
+            { label: "Escoriações leves", color: "Verde" },
+            { label: "Lesão superficial sem sangramento", color: "Azul" }
+        ] },
+        { id: "9.20", title: "Queimaduras", criteria: [
+            { label: "Queimadura >20% SC / via aérea / choque", color: "Vermelho" },
+            { label: "Queimadura 10-20% SC ou face/mãos / dor intensa", color: "Laranja" },
+            { label: "Queimadura superficial <10% SC", color: "Amarelo" },
+            { label: "Queimadura 1º grau pequena", color: "Verde" },
+            { label: "Dor >7d", color: "Azul" }
+        ] },
+        { id: "9.21", title: "Queixas oculares", criteria: [
+            { label: "Trauma penetrante / queimadura química grave", color: "Vermelho" },
+            { label: "Perda total visão aguda / dor intensa", color: "Laranja" },
+            { label: "Redução acuidade <7d / dor moderada / celulite peri-orbitária", color: "Amarelo" },
+            { label: "Olho vermelho / corpo estranho / diplopia / terçol", color: "Verde" },
+            { label: "Evento >7d", color: "Azul" }
+        ] },
+        { id: "9.22", title: "Queixas respiratórias", criteria: [
+            { label: "Obstrução VA / Glasgow<8", color: "Vermelho" },
+            { label: "Glasgow 9-12 / fadiga respiratória / SpO2<92%", color: "Laranja" },
+            { label: "Dispneia esforço SpO2>92% / O2 suplementar", color: "Amarelo" },
+            { label: "Rinorreia / tosse / dor garganta / sintomas gripais", color: "Verde" },
+            { label: "Evento >7d", color: "Azul" }
+        ] },
+        { id: "9.23", title: "Queixas urinárias / Dor testicular", criteria: [
+            { label: "Sinais de choque", color: "Vermelho" },
+            { label: "Priapismo / dor intensa / sangramento uretral incontrolável / trauma genital / violência sexual sangramento", color: "Laranja" },
+            { label: "Dor moderada / disúria com febre / hematúria / retenção urinária", color: "Amarelo" },
+            { label: "Dor leve <7d / disúria / secreção uretral", color: "Verde" },
+            { label: "Dor leve >7d / exposição sexual >30d", color: "Azul" }
+        ] },
+        { id: "9.24", title: "Sangramentos", criteria: [
+            { label: "Choque / obstrução VA", color: "Vermelho" },
+            { label: "Epistaxe sem controle / hematoquezia ativa / hematêmese / dor intensa / sangramento vaginal incontrolável na gestação", color: "Laranja" },
+            { label: "Dor moderada / história sangramento digestivo / fezes pretas", color: "Amarelo" },
+            { label: "Dor leve / hemorroidas / epistaxe controlada / evento <7d", color: "Verde" },
+            { label: "Evento >7d", color: "Azul" }
+        ] }
+    ];
+
+    // ========= PEDIÁTRICO resumido fiel ao PDF =========
+    const pediatricoQueixas = [
+        { id: "10.1", title: "Alterações SNC", criteria: [{label:"Apneia / crise ativa / Glasgow<8 / choque",color:"Vermelho"},{label:"Vômitos incoercíveis (≥5/h) / déficit neurológico agudo / T<35 ou >40°C / meningismo",color:"Laranja"},{label:"Choro incessante / vômitos moderados / febre 37.8-40°C",color:"Amarelo"},{label:"Perda consciência >24h / vômitos esparsos",color:"Verde"},{label:"Cefaleia sem rigidez nuca",color:"Azul"}] },
+        { id: "10.2", title: "Alterações Oftalmológicas", criteria: [{label:"Lesão química aguda / trauma penetrante",color:"Vermelho"},{label:"Sangramento ocular / perda total visão / dor intensa / neonato secreção",color:"Laranja"},{label:"Redução acuidade <7d / dor moderada / celulite",color:"Amarelo"},{label:"Olho vermelho com secreção / corpo estranho",color:"Verde"},{label:"Olho vermelho sem perda visual",color:"Azul"}] },
+        { id: "10.3", title: "Alterações Odontológicas", criteria: [{label:"Septicemia / obstrução VA / sangramento intenso",color:"Vermelho"},{label:"Dor intensa / sangramento médio / trismo",color:"Laranja"},{label:"Dor moderada / edema facial / abscessos",color:"Amarelo"},{label:"Sangramento pequeno / febre",color:"Verde"},{label:"Dor leve >7d",color:"Azul"}] },
+        { id: "10.4", title: "Alterações Otorrinolaringológicas", criteria: [{label:"Obstrução VA / Glasgow<8 / sangramento intenso",color:"Vermelho"},{label:"Glasgow9-12 / sangramento médio / otalgia intensa / choro inconsolável",color:"Laranja"},{label:"Trauma / corpo estranho / recusa alimentar",color:"Amarelo"},{label:"Dor local / vertigem / otorreia",color:"Verde"},{label:"Dor >7d",color:"Azul"}] },
+        { id: "10.5", title: "Alterações Respiratórias", criteria: [{label:"Parada respiratória / obstrução VA / gasping / Glasgow<8",color:"Vermelho"},{label:"Uso musculatura acessória / estridor / SpO2<90% / incapaz mamar",color:"Laranja"},{label:"Agitação / taquipneia idade / chiado / SpO2 90-94%",color:"Amarelo"},{label:"Tosse produtiva sem desconforto",color:"Verde"},{label:"Rinorreia isolada",color:"Azul"}] },
+        { id: "10.6", title: "Alterações Cardíacas", criteria: [{label:"Parada respiratória / Glasgow<8 / pulsos ausentes / cianose / TEC>2s",color:"Vermelho"},{label:"Glasgow9-12 / desidratação grave / arritmia grave",color:"Laranja"},{label:"Glasgow13-14 / história lipotimia",color:"Amarelo"},{label:"Vômito/diarreia sem desidratação",color:"Verde"}] },
+        { id: "10.7", title: "Alterações Gastrointestinais", criteria: [{label:"Glasgow<8 / hematêmese / choque séptico",color:"Vermelho"},{label:"Sepse / Glasgow9-12 / desidratação grave / hematoquezia",color:"Laranja"},{label:"Glasgow13-14 / dor abdominal persistente / vômitos persistentes / diarreia≥5",color:"Amarelo"},{label:"Vômito/diarreia sem desidratação / até 4 evacuações",color:"Verde"}] },
+        { id: "10.8", title: "Alterações Geniturinárias / Dor testicular", criteria: [{label:"Glasgow<8 / amputação pênis",color:"Vermelho"},{label:"Glasgow9-12 / desidratação grave / dor intensa / suspeita torção testicular / priapismo / abuso sexual",color:"Laranja"},{label:"Hematúria / dor moderada / celulite testicular",color:"Amarelo"},{label:"Disúria / dor leve / secreção",color:"Verde"},{label:"Dor leve >7d",color:"Azul"}] },
+        { id: "10.9", title: "Alterações Musculoesqueléticas", criteria: [{label:"Sangramento incontrolável / amputação / fratura exposta ossos longos",color:"Vermelho"},{label:"Sinais sepse / deformidade pós-trauma / dor intensa",color:"Laranja"},{label:"Necessidade sutura / alteração marcha aguda / dor moderada",color:"Amarelo"},{label:"Edema / escoriações / dor leve",color:"Verde"},{label:"Dor leve >7d",color:"Azul"}] },
+        { id: "10.10", title: "Alterações Dermatológicas", criteria: [{label:"Glasgow<8 / queimadura face / urticária grave",color:"Vermelho"},{label:"Sinais sepse / eritema>90% / exantema com edema face / petéquias",color:"Laranja"},{label:"Ferida corto-contusa / exantema extenso",color:"Amarelo"},{label:"Abscessos / urticária localizada",color:"Verde"},{label:"Feridas necrose",color:"Azul"}] },
+        { id: "10.11", title: "Alterações Glicêmicas", criteria: [{label:"Glasgow<8 / hipoglicemia grave / cetoacidose",color:"Vermelho"},{label:"Sepse / Glasgow9-12 / crise convulsiva HGT>400 / sudorese intensa",color:"Laranja"},{label:"Hiperglicemia 200-350 / sintomas DM",color:"Amarelo"},{label:"Hiperglicemia >200 assintomática",color:"Verde"},{label:"HGT 60-200 sem sintomas",color:"Azul"}] },
+        { id: "10.12", title: "Alterações Comportamentais", criteria: [{label:"Déficit neurológico / choque",color:"Vermelho"},{label:"Alteração consciência / overdose / extrema agitação",color:"Laranja"},{label:"Vômito persistente / alto risco heteroagressão / automutilação / violência sexual",color:"Amarelo"},{label:"Idea suicida / suspeita maus tratos",color:"Verde"},{label:"Sintomas ansiosos/depressivos",color:"Azul"}] },
+        { id: "10.13", title: "Eventos adversos pós-vacinais", criteria: [{label:"Glasgow<8 / apneia / angioedema laringe / cianose",color:"Vermelho"},{label:"Exantema generalizado / broncoespasmo / dispneia / paralisia",color:"Laranja"},{label:"Icterícia / edema lábios/olhos / crise <12h / vômitos persistentes / febre≥39°C",color:"Amarelo"},{label:"Petéquias / choro>3h / mialgia",color:"Verde"},{label:"Hiperemia ocular",color:"Azul"}] },
+        { id: "10.14", title: "Trauma e quedas", criteria: [{label:"Apneia / Glasgow≤8 / fratura exposta / sangramento incontrolável",color:"Vermelho"},{label:"Confusão / trauma cabeça com perda consciência / queda>2m com alteração consciência",color:"Laranja"},{label:"Glasgow13-14 / fraturas alinhadas / hematoma subgaleal",color:"Amarelo"},{label:"Escoriações / trauma cabeça>12h sem perda",color:"Verde"},{label:"Ferimento superficial",color:"Azul"}] },
+        { id: "10.15", title: "Intoxicações exógenas", criteria: [{label:"Obstrução VA / convulsão ativa / lesão ocular química",color:"Vermelho"},{label:"Edema facial/língua / SpO2<94% / vômitos incoercíveis / queimadura mucosa",color:"Laranja"},{label:"Erupções / história crise / dor moderada",color:"Amarelo"},{label:"Dor leve recente / alterações dérmicas",color:"Verde"},{label:"Evento >7d",color:"Azul"}] },
+        { id: "10.16", title: "Queimaduras", criteria: [{label:"Obstrução VA / choque / SCQ>25% / face",color:"Vermelho"},{label:"Dispneia / SCQ>9% com dor intensa / queimadura inalação / SpO2<94%",color:"Laranja"},{label:"Queimadura elétrica estável / queimadura química / dor moderada",color:"Amarelo"},{label:"Inflamação local / dor leve",color:"Verde"},{label:"Dor >7d",color:"Azul"}] },
+        { id: "10.17", title: "Mordeduras / picadas", criteria: [{label:"Obstrução VA / choque / mutilação",color:"Vermelho"},{label:"Edema face/língua / dor intensa / ferimento extenso cabeça/mãos / SpO2<94%",color:"Laranja"},{label:"Erupção >10% SC / dor moderada",color:"Amarelo"},{label:"Infecção local / dor leve",color:"Verde"},{label:"Evento >7d",color:"Azul"}] },
+        { id: "10.18", title: "Violência física", criteria: [{label:"Déficit neurológico agudo / choque",color:"Vermelho"},{label:"Alteração consciência / overdose / extrema agitação",color:"Laranja"},{label:"Vômito persistente / alto risco / violência sexual",color:"Amarelo"},{label:"Suspeita violência/maus tratos",color:"Verde"},{label:"Sintomas ansiosos/depressivos",color:"Azul"}] },
+        { id: "10.19", title: "Situações especiais", criteria: [{label:"Afogamento em PCR / choque elétrico com PCR / parada respiratória mantendo pulso",color:"Vermelho"},{label:"Afogamento sem repercussão / choque elétrico estável",color:"Laranja"},{label:"Suspeita afogamento sem alteração sinais vitais",color:"Verde"}] }
+    ];
+
+    let currentType = "adulto";
+    let currentQueixaObj = null;
+    let currentCheckState = [];
+
+    function getCurrentQueixas() { return currentType === "adulto" ? adultoQueixas : pediatricoQueixas; }
+
+    function updateResultUI(color) {
+        const badge = document.getElementById("resultColorBadge");
+        const titleEl = document.getElementById("resultTitle");
+        const timeEl = document.getElementById("resultTime");
+        const msgEl = document.getElementById("resultMessage");
+        if (!color) {
+            badge.style.background = "#cddfe7";
+            titleEl.innerText = "Aguardando";
+            timeEl.innerHTML = "⏱️ Selecione sintomas";
+            msgEl.innerText = "Marque os discriminadores conforme avaliação clínica. O sistema define a cor de maior prioridade.";
+            return;
+        }
+        const bg = COR_COLORS[color];
+        badge.style.background = bg;
+        titleEl.innerText = COR_LABELS[color];
+        timeEl.innerHTML = `⏱️ ${COR_TIMES[color]}`;
+        msgEl.innerHTML = `Critério mais grave: ${color}. Encaminhamento conforme fluxo de urgência. ${color === "Vermelho" ? "Atendimento imediato na sala de reanimação." : ""}`;
+    }
+
+    function updateRiskClassification() {
+        if (!currentQueixaObj) { updateResultUI(null); return; }
+        let highestColor = null;
+        let highestVal = -1;
+        for (let i=0; i<currentCheckState.length; i++) {
+            if (currentCheckState[i]) {
+                const cor = currentQueixaObj.criteria[i].color;
+                const prio = COR_PRIORITY[cor];
+                if (prio > highestVal) { highestVal = prio; highestColor = cor; }
+            }
+        }
+        updateResultUI(highestColor);
+    }
+
+    function renderChecklist() {
+        const container = document.getElementById("checklistContainer");
+        if (!currentQueixaObj || !currentQueixaObj.criteria) {
+            container.innerHTML = `<div style="padding: 24px; text-align:center; color:#7c9cba;">Selecione uma queixa principal</div>`;
+            return;
+        }
+        currentCheckState = new Array(currentQueixaObj.criteria.length).fill(false);
+        let html = "";
+        currentQueixaObj.criteria.forEach((c, idx) => {
+            const col = COR_COLORS[c.color];
+            html += `
+                <div class="risk-item">
+                    <input type="checkbox" id="crit_${idx}" data-idx="${idx}">
+                    <label for="crit_${idx}">${c.label}</label>
+                    <span class="risk-badge" style="background:${col}15; color:${col};">${c.color}</span>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        for (let i=0; i<currentQueixaObj.criteria.length; i++) {
+            const chk = document.getElementById(`crit_${i}`);
+            if (chk) {
+                chk.addEventListener("change", (e) => {
+                    currentCheckState[i] = e.target.checked;
+                    updateRiskClassification();
+                });
+            }
+        }
+        updateRiskClassification();
+    }
+
+    function onQueixaChange() {
+        const select = document.getElementById("queixaSelect");
+        const idx = parseInt(select.value, 10);
+        const queixas = getCurrentQueixas();
+        if (queixas[idx]) {
+            currentQueixaObj = queixas[idx];
+            renderChecklist();
+        } else { currentQueixaObj = null; renderChecklist(); }
+    }
+
+    function populateSelect() {
+        const select = document.getElementById("queixaSelect");
+        const queixas = getCurrentQueixas();
+        select.innerHTML = "";
+        queixas.forEach((q, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.textContent = `${q.id} · ${q.title}`;
+            select.appendChild(opt);
+        });
+        if (queixas.length) onQueixaChange();
+    }
+
+    function clearAllChecks() {
+        if (!currentQueixaObj) return;
+        for (let i=0; i<currentCheckState.length; i++) {
+            currentCheckState[i] = false;
+            const chk = document.getElementById(`crit_${i}`);
+            if (chk) chk.checked = false;
+        }
+        updateRiskClassification();
+    }
+
+    function setActiveTab(tab) {
+        currentType = tab;
+        document.getElementById("tabAdulto").classList.toggle("active", tab==="adulto");
+        document.getElementById("tabPediatrico").classList.toggle("active", tab==="pediatrico");
+        populateSelect();
+    }
+
+    document.getElementById("tabAdulto").addEventListener("click", () => setActiveTab("adulto"));
+    document.getElementById("tabPediatrico").addEventListener("click", () => setActiveTab("pediatrico"));
+    document.getElementById("queixaSelect").addEventListener("change", onQueixaChange);
+    document.getElementById("clearChecksBtn").addEventListener("click", clearAllChecks);
+
+    populateSelect();
+</script>
+</body>
+</html>
